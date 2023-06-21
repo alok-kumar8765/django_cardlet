@@ -1,0 +1,147 @@
+{% extends "newset/template.html" %}
+
+{% block title %}
+    View {{ set.title }} Set
+{% endblock %}
+
+{% block main %}
+    <style>
+        /* The flip card container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
+        .flip-card {
+        background-color: transparent;
+        width: 600px;
+        height: 200px;
+        border: 1px solid #f1f1f1;
+        perspective: 1000px; /* Remove this if you don't want the 3D effect */
+        }
+
+        /* This container is needed to position the front and back side */
+        .flip-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        }
+
+        /* Do an horizontal flip when you move the mouse over the flip box container */
+        .flip-card:hover .flip-card-inner {
+        transform: rotateY(180deg);
+        }
+
+        /* Position the front and back side */
+        .flip-card-front, .flip-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden; /* Safari */
+        backface-visibility: hidden;
+        }
+
+        /* Style the front side (fallback if image is missing) */
+        .flip-card-front {
+        background-color: #bbb;
+        color: black;
+        }
+
+        /* Style the back side */
+        .flip-card-back {
+        background-color: dodgerblue;
+        color: white;
+        transform: rotateY(180deg);
+        }
+
+        .previous {
+          background-color: #f1f1f1;
+          color: black;
+        }
+
+        .next {
+          background-color: #04AA6D;
+          color: white;
+        }
+
+        a {
+          text-decoration: none;
+          display: inline-block;
+          padding: 8px 16px;
+        }
+
+        a:hover {
+          background-color: #ddd;
+          color: black;
+        }
+
+        .round {
+          border-radius: 50%;
+        }
+    </style>
+    <div class="container">
+        <div class="flip-card">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <h1 id="word">{{ flashcards.0.word }}</h1>
+              </div>
+              <div class="flip-card-back">
+                <p id="def">{{ flashcards.0.definition }}</h1>
+              </div>
+            </div>
+        </div>
+        <a href="#" class="previous round" onclick="viewPrevCard()">&#8249;</a>
+        <a href="#" class="next round" onclick="viewNextCard()">&#8250;</a>
+        <br>
+        <span><span id="curr">1</span> / {{ flashcards.count }}</span>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Term</th>
+              <th scope="col">Definition</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for card in flashcards %}
+              <tr>
+                <th scope="row">{{ card.word }}</th>
+                <td>{{ card.definition }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+
+    <script>
+      var curr =  0
+      var max = parseInt('{{ flashcards.count }}')-1
+      var min = 0
+  
+      function viewNextCard() {
+        if (curr != max) {
+          curr++
+          fetch(`/set/json/{{ set.set_id }}?order=${curr}`)
+          .then(response => response.json())
+          .then(data => {
+            console.log(data)
+            document.getElementById("word").innerText = data["word"]
+            document.getElementById("def").innerText = data["def"]
+          })
+        }
+        document.getElementById("curr").innerText = curr + 1
+      }
+
+      function viewPrevCard() {
+        if (curr != min) {
+          curr--
+          fetch(`/set/json/{{ set.set_id }}?order=${curr}`)
+          .then(response => response.json())
+          .then(data => {
+            console.log(data)
+            document.getElementById("word").innerText = data["word"]
+            document.getElementById("def").innerText = data["def"]
+          })
+        }
+        document.getElementById("curr").innerText = curr + 1
+      }
+    </script>
+{% endblock %}
